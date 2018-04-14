@@ -7,10 +7,10 @@ contract microlending_platform {
     //Borrower[] public borrowers;
     Transaction[] public allTransactions;
     mapping(address=>bool) isLender;
-    mapping(address=>Request[]) lenderRequests;
+    mapping(address=>Lender) lenderRequests;
     mapping(address=>Borrower) borrowers;
     
-    enum States { REQUESTED , APPROVED, REJECTED , CLOSED }
+    enum States { REQUESTED , APPROVED, REJECTED ,BORROWER_PAID, CLOSED }
     
     struct Transaction{
         address sender;
@@ -22,12 +22,14 @@ contract microlending_platform {
         address selfAdd;
         string name;
         uint roi;
+        Request[] requests;
     }
    // map(lenderAddress, Request[])
     struct Borrower {
         address selfAdd;
         string name;
         uint rating;
+        Request[] requests;
     }
     
     struct Request {
@@ -44,7 +46,8 @@ contract microlending_platform {
         Lender memory newLender = Lender({
            selfAdd:msg.sender,
            name:name,
-           roi:roi
+           roi:roi,
+           requests:new Request[](0)
         });
         
         lenders.push(newLender);
@@ -65,6 +68,17 @@ contract microlending_platform {
         Borrower storage borrower = borrowers[borroweradd];
         return borrower.rating;
     }
+    //used by borrower to see his requests
+    function showBorrowerRequest(uint index) public view returns(Request){
+        return borrowers[msg.sender].requests[index];
+    }
+    
+    function makeBorrowerPayment(uint index)public payable {
+        Request request = borrowers[msg.sender].requests[index];
+        request.lender.transfer(request.amount);
+        request.state = States.BORROWER_PAID;
+        request.actualPaymentDate = now;
+    }
     
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
     
@@ -78,23 +92,24 @@ contract microlending_platform {
              paymentDate:0,
              actualPaymentDate:0
             });
-        Request[] storage requests =  lenderRequests[lender];
+        Request[] storage requests =  lenderRequests[lender].requests;
         requests.push(request);
     }
     //ui is supposed to maintain the index
     function showLenderRequests(uint index) public view onlyLender(index) returns(Request){
-        Request[] storage requests = lenderRequests[msg.sender];
+        Request[] storage requests = lenderRequests[msg.sender].requests;
         return requests[index];
     } 
     
     //ui is supposed to maintain the index
     function approveRequest(uint index,bool approved) public payable onlyLender(index){
-        Request[] storage requests = lenderRequests[msg.sender];
+        Request[] storage requests = lenderRequests[msg.sender].requests;
         Request storage request = requests[index];
         if(approved){
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
+            request.paymentDate = now+(request.tenure*60*60*24);
         }else{
             request.state = States.REJECTED;
         }
@@ -104,7 +119,7 @@ contract microlending_platform {
         //score should be out of 10
         require(score<=10);
         //calculate the new rating
-        Request storage request = lenderRequests[msg.sender][index];
+        Request storage request = lenderRequests[msg.sender].requests[index];
         Borrower storage borrower = borrowers[request.borrower];
         uint oldrating = borrower.rating; 
         //update score of the borrower
@@ -119,7 +134,7 @@ contract microlending_platform {
     
     modifier onlyLender(uint index){
         require(isLender[msg.sender]);
-        Request storage request = lenderRequests[msg.sender][index];
+        Request storage request = lenderRequests[msg.sender].requests[index];
         require(msg.sender==request.lender);
         _;
     }
