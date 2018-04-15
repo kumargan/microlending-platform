@@ -56,14 +56,14 @@ contract microlending_platform {
         isLender[msg.sender]=true;
     }
     
-    function showLender(uint index) public view returns(Lender) {
-        return lenders[index];
+    function showLender(uint index) public view returns(string,uint,address) {
+        return (lenders[index].name,lenders[index].roi,lenders[index].selfAdd);
     }
     
     //function showLenders(uint startIndex, uint endIndex,bool sort) public payable returns(Lender[]) { }
     
-    function showTransaction(uint index) public view returns(Transaction){
-        return allTransactions[index];
+    function showTransaction(uint index) public view returns(address,address,uint){
+        return (allTransactions[index].sender,allTransactions[index].receiver,allTransactions[index].amount);
     }
     
     function showBorrowerRating(address borroweradd) public view returns(uint){
@@ -75,19 +75,22 @@ contract microlending_platform {
         Borrower memory borrower = Borrower({
             selfAdd:msg.sender,
             name : name,
-            rating : 100
+            rating : 10
         }) ;    
         
         borrowers[msg.sender]=borrower;
     }
     
     //used by borrower to see his requests
-    function showBorrowerRequest(uint index) public view returns(Request){
-        return borrowerRequests[msg.sender][index];
+    function showBorrowerRequest(uint index) public view returns(address,uint,uint,uint,uint){
+        Request storage request = borrowerRequests[msg.sender][index];
+        return (request.lender,uint(request.state),request.paymentDate,request.tenure,request.amount);
     }
     
     function makeBorrowerPayment(uint index)public payable {
+        
         Request storage request = borrowerRequests[msg.sender][index];
+        require(msg.value>=request.amount);
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
         request.actualPaymentDate = now;
@@ -111,9 +114,9 @@ contract microlending_platform {
         bRequests.push(request);
     }
     //ui is supposed to maintain the index
-    function showLenderRequests(uint index) public view onlyLender(index) returns(Request){
-        Request[] storage requests = lenderRequests[msg.sender];
-        return requests[index];
+    function showLenderRequests(uint index) public view onlyLender(index) returns(address,uint,uint,uint,uint){
+        Request storage request = lenderRequests[msg.sender][index];
+        return (request.borrower,uint(request.state),request.paymentDate,request.tenure,request.amount);
     } 
     
     //ui is supposed to maintain the index
@@ -138,8 +141,8 @@ contract microlending_platform {
         Borrower storage borrower = borrowers[request.borrower];
         uint oldrating = borrower.rating; 
         //update score of the borrower
-        uint normalizedVal = (90/oldrating);
-        uint newRating = (normalizedVal+score)/100;
+        
+        uint newRating = ((oldrating+newRating)/20)*10;
         borrower.rating = newRating;
         
         //close the Request
