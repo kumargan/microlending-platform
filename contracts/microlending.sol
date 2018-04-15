@@ -7,10 +7,15 @@ contract microlending_platform {
     //Borrower[] public borrowers;
     Transaction[] public allTransactions;
     mapping(address=>bool) isLender;
-    mapping(address=>Lender) lenderRequests;
     mapping(address=>Borrower) borrowers;
+    mapping(address=>Request[]) lenderRequests;
+    mapping(address=>Request[]) borrowerRequests;
     
     enum States { REQUESTED , APPROVED, REJECTED ,BORROWER_PAID, CLOSED }
+    
+    function microlending_platform() public {
+        
+    }
     
     struct Transaction{
         address sender;
@@ -22,14 +27,12 @@ contract microlending_platform {
         address selfAdd;
         string name;
         uint roi;
-        Request[] requests;
     }
    // map(lenderAddress, Request[])
     struct Borrower {
         address selfAdd;
         string name;
         uint rating;
-        Request[] requests;
     }
     
     struct Request {
@@ -46,8 +49,7 @@ contract microlending_platform {
         Lender memory newLender = Lender({
            selfAdd:msg.sender,
            name:name,
-           roi:roi,
-           requests:new Request[](0)
+           roi:roi
         });
         
         lenders.push(newLender);
@@ -68,13 +70,24 @@ contract microlending_platform {
         Borrower storage borrower = borrowers[borroweradd];
         return borrower.rating;
     }
+    
+    function createBorrower(string name) public {
+        Borrower memory borrower = Borrower({
+            selfAdd:msg.sender,
+            name : name,
+            rating : 100
+        }) ;    
+        
+        borrowers[msg.sender]=borrower;
+    }
+    
     //used by borrower to see his requests
     function showBorrowerRequest(uint index) public view returns(Request){
-        return borrowers[msg.sender].requests[index];
+        return borrowerRequests[msg.sender][index];
     }
     
     function makeBorrowerPayment(uint index)public payable {
-        Request request = borrowers[msg.sender].requests[index];
+        Request storage request = borrowerRequests[msg.sender][index];
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
         request.actualPaymentDate = now;
@@ -92,18 +105,20 @@ contract microlending_platform {
              paymentDate:0,
              actualPaymentDate:0
             });
-        Request[] storage requests =  lenderRequests[lender].requests;
+        Request[] storage requests =  lenderRequests[lender];
+        Request[] storage bRequests = borrowerRequests[msg.sender];
         requests.push(request);
+        bRequests.push(request);
     }
     //ui is supposed to maintain the index
     function showLenderRequests(uint index) public view onlyLender(index) returns(Request){
-        Request[] storage requests = lenderRequests[msg.sender].requests;
+        Request[] storage requests = lenderRequests[msg.sender];
         return requests[index];
     } 
     
     //ui is supposed to maintain the index
     function approveRequest(uint index,bool approved) public payable onlyLender(index){
-        Request[] storage requests = lenderRequests[msg.sender].requests;
+        Request[] storage requests = lenderRequests[msg.sender];
         Request storage request = requests[index];
         if(approved){
             request.borrower.transfer(request.amount);
@@ -119,7 +134,7 @@ contract microlending_platform {
         //score should be out of 10
         require(score<=10);
         //calculate the new rating
-        Request storage request = lenderRequests[msg.sender].requests[index];
+        Request storage request = lenderRequests[msg.sender][index];
         Borrower storage borrower = borrowers[request.borrower];
         uint oldrating = borrower.rating; 
         //update score of the borrower
@@ -134,7 +149,7 @@ contract microlending_platform {
     
     modifier onlyLender(uint index){
         require(isLender[msg.sender]);
-        Request storage request = lenderRequests[msg.sender].requests[index];
+        Request storage request = lenderRequests[msg.sender][index];
         require(msg.sender==request.lender);
         _;
     }
