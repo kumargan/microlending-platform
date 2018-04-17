@@ -6,4 +6,4 @@ import address from './address.json';
 //console.log('address  ',address.address);
 
 
-export default new web3.eth.Contract(abi, address);
+export default new web3.eth.Contract(abi, address.address);
