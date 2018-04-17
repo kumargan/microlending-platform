@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import web3 from './web3';
+import proxy from './contract-proxy';
 
 class App extends Component {
   render() {

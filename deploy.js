@@ -23,11 +23,20 @@ const deploy = async ()=>{
     console.log('contract deployed at ',results.options.address);
     //console.log('interface/ABI',interface);
 
-    fs.writeFile("interface.json", interface, function(err) {
+    fs.writeFile("./src/interface.json", interface, function(err) {
         if(err) {
             return console.log(err);
         }
         console.log("interface saved in interface.json");
+    });
+
+    let addressJson = {};
+    addressJson.address  = results.options.address;
+    fs.writeFile("./src/address.json", JSON.stringify(addressJson), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("interface saved in address.json");
     });
 };
 
