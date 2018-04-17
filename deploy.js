@@ -1,5 +1,6 @@
 const HDWalletProvider =  require('truffle-hdwallet-provider');
 const Web3 = require('web3');
+const fs = require('fs');
 const { interface, bytecode } = require('./compile');
 var mnemonic = process.env.mnemonic.replace('Mnemonic:','').trim();
 console.log(mnemonic);
@@ -20,6 +21,14 @@ const deploy = async ()=>{
     .send({gas:'6721975',from:accounts[0]});
 
     console.log('contract deployed at ',results.options.address);
+    //console.log('interface/ABI',interface);
+
+    fs.writeFile("interface.json", interface, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("interface saved in interface.json");
+    });
 };
 
 deploy();

@@ -2,3 +2,5 @@
 node_modules
 *.pid
 *mnemonic.txt
+
+interface.json

@@ -27,8 +27,5 @@ else
   mnemonic=`cat mnemonic.txt` node deploy.js
   echo "starting node server"
   npm i
-  cd ui
-  npm i
   npm start
-  cd ..
 fi
