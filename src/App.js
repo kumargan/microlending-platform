@@ -9,7 +9,7 @@ class App extends Component {
     accounts: [],
     currentLender: '',
     currentLenderIndex: 0,
-    totalLenders: 2,
+    totalLenders: 0,
     lenderDetails: {
       name: '',
       roi: ''
@@ -91,9 +91,10 @@ class App extends Component {
       parseInt(this.state.loanRequest.tenure))
       .send({ from: this.state.accounts[0], gas: 6654754 });
   }
+
   async componentDidMount() {
-    let tempTotalLenders = await proxy.methods.numberOfLenders.call();
-    this.setState({ totalLenders: tempTotalLenders });
+    let tempTotalLenders = await proxy.methods.numberOfLenders().call();
+    this.setState({ totalLenders: parseInt(tempTotalLenders) });
     let tempAccounts = await web3.eth.getAccounts();
     this.setState({ accounts: tempAccounts });
   }
