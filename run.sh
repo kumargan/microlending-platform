@@ -1,6 +1,26 @@
 #!bin bash
 	unset DOCKER_HOST
 
+	nodepath=`which npm`
+
+	if [ -z != $nodepath ]
+	  then
+	    echo "node already installed"
+	  else
+	    echo " install node and continue, exiting...... "
+	    exit
+	fi
+
+	dockerpath=`which docker`
+
+	if [ -z != $dockerpath ]
+	  then
+	      echo "docker already installed"
+	  else
+	      echo "please install docker and continue, exiting "
+	      exit
+	fi
+
 	file="process.pid"
 	if [ -f "$file" ]
 	then
