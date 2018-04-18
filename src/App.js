@@ -29,7 +29,7 @@ class App extends Component {
     if (newIndex < this.state.totalLenders) {
       this.setState({ currentLenderIndex: newIndex });
       let tempLender = await proxy.methods.showLender(newIndex).call();
-      this.setState({ currentLender: tempLender })
+      this.setState({ currentLender: tempLender });
       console.log("LENDER : ", JSON.stringify(tempLender));
     }
     else {
@@ -51,19 +51,19 @@ class App extends Component {
   }
 
   async getLenderRequests() {
-    
+
   }
 
   async registerLender(e, submitType) {
     await proxy.methods.registerLender(this.state.lenderDetails.name, parseInt(this.state.lenderDetails.roi))
       .send({ from: this.state.accounts[0], gas: 6654754 });
-      alert("Lender added Successfully");
+    alert("Lender added Successfully");
   }
 
   async registerBorrower(e, submitType) {
     await proxy.methods.createBorrower(this.state.borrowerDetails.name)
       .send({ from: this.state.accounts[0], gas: 6654754 });
-      alert("Borrower added Successfully");
+    alert("Borrower added Successfully");
   }
 
   handleLenderInputChange(field, e) {
@@ -97,6 +97,8 @@ class App extends Component {
     this.setState({ totalLenders: parseInt(tempTotalLenders) });
     let tempAccounts = await web3.eth.getAccounts();
     this.setState({ accounts: tempAccounts });
+    let tempLender = await proxy.methods.showLender(this.state.currentLenderIndex).call();
+    this.setState({ currentLender: tempLender });
   }
 
   render() {
