@@ -53,7 +53,7 @@ contract microlending_platform {
         });
         
         lenders.push(newLender);
-        isLender[msg.sender]=true;
+        isLender[msg.sender] = true;
     }
     
     function showLender(uint index) public view returns(string,uint,address) {
@@ -80,9 +80,9 @@ contract microlending_platform {
             selfAdd:msg.sender,
             name : name,
             rating : 10
-        }) ;    
+        });    
         
-        borrowers[msg.sender]=borrower;
+        borrowers[msg.sender] = borrower;
     }
     
     //used by borrower to see his requests
@@ -97,7 +97,7 @@ contract microlending_platform {
         require(msg.value>=request.amount);
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
-        request.actualPaymentDate = now;
+        request.actualPaymentDate = block.timestamp;
     }
     
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
@@ -112,7 +112,7 @@ contract microlending_platform {
              paymentDate:0,
              actualPaymentDate:0
             });
-        Request[] storage requests =  lenderRequests[lender];
+        Request[] storage requests = lenderRequests[lender];
         Request[] storage bRequests = borrowerRequests[msg.sender];
         requests.push(request);
         bRequests.push(request);
@@ -131,7 +131,7 @@ contract microlending_platform {
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
-            request.paymentDate = now+(request.tenure*60*60*24);
+            request.paymentDate = block.timestamp + (request.tenure*60*60*24);
         }else{
             request.state = States.REJECTED;
         }
