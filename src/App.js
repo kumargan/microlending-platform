@@ -179,7 +179,7 @@ class App extends Component {
             value={this.state.loanRequest.lenderAddress} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'lenderAddress')} />
           <Input type="text" ref="amount" placeholder="Enter Loan Amount"
             value={this.state.loanRequest.amount} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'amount')} />
-          <Input type="text" ref="tenure" placeholder="Enter Tenure for Loan"
+          <Input type="text" ref="tenure" placeholder="Enter Tenure for Loan (in days)"
             value={this.state.loanRequest.tenure} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'tenure')} />
         </div>
         <button id="createLoanReqButton" onClick={() => this.createLoanRequest()} >Create Loan Request</button>
