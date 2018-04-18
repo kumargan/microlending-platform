@@ -69,6 +69,10 @@ contract microlending_platform {
     function showTransaction(uint index) public view returns(address,address,uint){
         return (allTransactions[index].sender,allTransactions[index].receiver,allTransactions[index].amount);
     }
+
+    function numberOfTransactions() public view returns(uint) {
+        return allTransactions.length;
+    }
     
     function showBorrowerRating(address borroweradd) public view returns(uint){
         Borrower storage borrower = borrowers[borroweradd];
