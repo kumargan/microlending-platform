@@ -10,6 +10,7 @@ Features :
  6. Borrowers can browse through their requests and make payments to the lenders.
  7. Anyone can browse through all the transactions.
  8. Lenders can browse through their requests queue ( Approve, Reject, View Borrower Rating, Close Request (Once request moves to "BORROWER_PAID" state, submit Borrower Rating ).
+ 9. There is no EMI option. Loan has to be paid in full at once.
 
 ## Run locally and test :
 
