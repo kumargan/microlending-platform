@@ -19,17 +19,17 @@ class App extends Component {
   }
 
   async getNextLender() {
-    this.setState({ currentLenderIndex: this.state.currentLenderIndex + 1 });
-    let tempIndex = this.state.currentLenderIndex;
-    let tempLender = await proxy.methods.showLender(tempIndex).call();
+    let newIndex = this.state.currentLenderIndex + 1;
+    this.setState({ currentLenderIndex: newIndex });
+    let tempLender = await proxy.methods.showLender(newIndex).call();
     this.setState({ currentLender: tempLender })
     console.log("LENDER 2 :: ", JSON.stringify(tempLender));
   }
 
   async getPreviousLender() {
-    this.setState({ currentLenderIndex: this.state.currentLenderIndex - 1 });
-    let index = this.state.currentLenderIndex;
-    let tempLender = await proxy.methods.showLender(index).call();
+    let newIndex = this.state.currentLenderIndex - 1;
+    this.setState({ currentLenderIndex: newIndex });
+    let tempLender = await proxy.methods.showLender(newIndex).call();
     this.setState({ currentLender: tempLender })
     console.log("LENDER 2 :: ", JSON.stringify(tempLender));
   }
