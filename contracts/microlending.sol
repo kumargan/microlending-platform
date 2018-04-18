@@ -59,6 +59,10 @@ contract microlending_platform {
     function showLender(uint index) public view returns(string,uint,address) {
         return (lenders[index].name,lenders[index].roi,lenders[index].selfAdd);
     }
+
+    function numberOfLenders() public view returns(uint) {
+        return lenders.length;
+    }
     
     //function showLenders(uint startIndex, uint endIndex,bool sort) public payable returns(Lender[]) { }
     

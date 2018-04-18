@@ -9,42 +9,64 @@ class App extends Component {
     accounts: [],
     currentLender: '',
     currentLenderIndex: 0,
+    totalLenders: 2,
     lenderDetails: {
       name: '',
       roi: ''
     },
     borrowerDetails: {
       name: ''
+    },
+    loanRequest: {
+      lenderAddress: '',
+      amount: '',
+      tenure: ''
     }
   }
 
   async getNextLender() {
     let newIndex = this.state.currentLenderIndex + 1;
-    this.setState({ currentLenderIndex: newIndex });
-    let tempLender = await proxy.methods.showLender(newIndex).call();
-    this.setState({ currentLender: tempLender })
-    console.log("LENDER 2 :: ", JSON.stringify(tempLender));
+    if (newIndex < this.state.totalLenders) {
+      this.setState({ currentLenderIndex: newIndex });
+      let tempLender = await proxy.methods.showLender(newIndex).call();
+      this.setState({ currentLender: tempLender })
+      console.log("LENDER : ", JSON.stringify(tempLender));
+    }
+    else {
+      alert("Invalid Index for Lender");
+    }
   }
 
   async getPreviousLender() {
     let newIndex = this.state.currentLenderIndex - 1;
-    this.setState({ currentLenderIndex: newIndex });
-    let tempLender = await proxy.methods.showLender(newIndex).call();
-    this.setState({ currentLender: tempLender })
-    console.log("LENDER 2 :: ", JSON.stringify(tempLender));
+    if (newIndex > -1) {
+      this.setState({ currentLenderIndex: newIndex });
+      let tempLender = await proxy.methods.showLender(newIndex).call();
+      this.setState({ currentLender: tempLender })
+      console.log("LENDER 2 :: ", JSON.stringify(tempLender));
+    }
+    else {
+      alert("Invalid Index for Lender");
+    }
   }
 
   async getLenderRequests() {
-
+    
   }
 
   async registerLender(e, submitType) {
     await proxy.methods.registerLender(this.state.lenderDetails.name, parseInt(this.state.lenderDetails.roi))
-    .send({ from: this.state.accounts[0], gas: 6654754 });
+      .send({ from: this.state.accounts[0], gas: 6654754 });
+      alert("Lender added Successfully");
+  }
+
+  async registerBorrower(e, submitType) {
+    await proxy.methods.createBorrower(this.state.borrowerDetails.name)
+      .send({ from: this.state.accounts[0], gas: 6654754 });
+      alert("Borrower added Successfully");
   }
 
   handleLenderInputChange(field, e) {
-    console.log("yoo");
     let lenderDetails = this.state.lenderDetails;
     lenderDetails[field] = e.target.value;
     this.setState({ lenderDetails: lenderDetails });
@@ -57,13 +79,23 @@ class App extends Component {
     this.setState({ borrowerDetails: borrowerDetails });
   }
 
+  handleLoanRequestInputChange(field, e) {
+    let loanRequest = this.state.loanRequest;
+    loanRequest[field] = e.target.value;
+    this.setState({ loanRequest: loanRequest });
+  }
 
+  async createRequest(e) {
+    await proxy.methods.createBorrower(this.state.loanRequest.lenderAddress,
+      parseInt(this.state.loanRequest.amount),
+      parseInt(this.state.loanRequest.tenure))
+      .send({ from: this.state.accounts[0], gas: 6654754 });
+  }
   async componentDidMount() {
+    let tempTotalLenders = await proxy.methods.numberOfLenders.call();
+    this.setState({ totalLenders: tempTotalLenders });
     let tempAccounts = await web3.eth.getAccounts();
     this.setState({ accounts: tempAccounts });
-    let index = this.state.currentLenderIndex || 0;
-    let tempLender = await proxy.methods.showLender(index).call();
-    this.setState({ currentLender: tempLender })
   }
 
   render() {
@@ -87,19 +119,25 @@ class App extends Component {
           <Input type="text" ref="lenderRoi" placeholder="Enter ROI"
             value={this.state.lenderDetails.roi} handleInputChange={this.handleLenderInputChange.bind(this, 'roi')} />
         </div>
-
         <button id="registerLenderButton" onClick={() => this.registerLender()} >Register Lender</button>
 
         <hr></hr>
         <div>
-          <input type="text" ref="borrowerName" placeholder="Enter Borrower Name"
-            value={this.state.borrowerDetails.name} maxLength={100}
-            handleInputChange={this.handleBorrowerInputChange.bind(this, 'name')}
-            required />
+          <Input type="text" ref="borrowerName" placeholder="Enter Borrower Name"
+            value={this.state.borrowerDetails.name} handleInputChange={this.handleBorrowerInputChange.bind(this, 'name')} />
         </div>
-
-
         <button id="registerBorrowerButton" onClick={() => this.registerBorrower()} >Register Borrower</button>
+
+        <hr></hr>
+        <div>
+          <Input type="text" ref="lenderAddress" placeholder="Enter Lender Address"
+            value={this.state.loanRequest.lenderAddress} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'lenderAddress')} />
+          <Input type="text" ref="amount" placeholder="Enter Loan Amount"
+            value={this.state.borrowerDetails.name} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'amount')} />
+          <Input type="text" ref="tenure" placeholder="Enter Tenure for Loan"
+            value={this.state.borrowerDetails.name} handleInputChange={this.handleLoanRequestInputChange.bind(this, 'tenure')} />
+        </div>
+        <button id="createLoanReqButton" onClick={() => this.createLoanRequest()} >Create Loan Request</button>
       </div>
     );
   }
