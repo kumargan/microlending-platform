@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Link } from 'react-router';
-import web3 from './web3';
-import proxy from './contract-proxy';
-import Input from './controls/Input';
 
 class App extends Component {
   state = {
@@ -27,6 +24,12 @@ class App extends Component {
         </div>
         <div>
           <Link to="/transactions" name="lenderReqButton" id="lenderReqButton">View All Transactions</Link>
+        </div>
+        <div>
+          <Link to="/lender/requests" name="lenderReqButton" id="lenderReqButton">View Lender Requests</Link>
+        </div>
+        <div>
+          <Link to="/borrower/requests" name="lenderReqButton" id="lenderReqButton">View Borrower Requests</Link>
         </div>
         {this.props.children}
       </div>

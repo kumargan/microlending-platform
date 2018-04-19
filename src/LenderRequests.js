@@ -1,23 +1,26 @@
-import React, { Component } from 'react';
+import React from 'react';
 import proxy from './contract-proxy';
+import web3 from './web3';
+import Input from './controls/Input';
 
 export default class LenderRequests extends React.Component {
     state = {
+        accounts: [],
         currentRequestIndex: 0,
         currentRequest: '',
         totalRquests: 0,
-        borrowerRating: ''
+        borrowerRating: '',
+        enterBorrowerRating: ''
     }
-    constructor(props) {
-        super(props);
-
-    };
 
     async componentDidMount() {
-        let tempTotalRquests = await proxy.methods.totalLenderRequests().call();
+        let tempAccounts = await web3.eth.getAccounts();
+        this.setState({ accounts: tempAccounts });
+
+        let tempTotalRquests = await proxy.methods.totalLenderRequests().call({ from: tempAccounts[0] });
         this.setState({ totalRquests: parseInt(tempTotalRquests) });
 
-        let tempRequest = await proxy.methods.showLenderRequests(this.state.currentRequestIndex).call();
+        let tempRequest = await proxy.methods.showLenderRequests(this.state.currentRequestIndex).call({ from: tempAccounts[0] });
         this.setState({ currentRequest: tempRequest });
     }
 
@@ -25,7 +28,7 @@ export default class LenderRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex + 1;
         if (newIndex < this.state.totalRquests) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call();
+            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call({ from: this.state.accounts[0] });
             this.setState({ currentRequest: tempRequest });
         }
         else {
@@ -38,7 +41,7 @@ export default class LenderRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex - 1;
         if (newIndex > -1) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call();
+            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call({ from: this.state.accounts[0] });
             this.setState({ currentRequest: tempRequest });
         }
         else {
@@ -47,19 +50,38 @@ export default class LenderRequests extends React.Component {
     }
 
     async closeRequest() {
-
+        if (this.state.enterBorrowerRating) {
+            await proxy.methods.closeRequest(this.state.currentRequestIndex, this.state.enterBorrowerRating)
+                .send({ from: this.state.accounts[0], gas: 6654754 });
+            alert("Request closed successfully");
+        }
+        else {
+            alert("Enter Borrower Rating.");
+        }
     }
 
     async rejectRequest() {
-
+        await proxy.methods.approveRequest(this.state.currentRequestIndex, false)
+            .send({ from: this.state.accounts[0], gas: 6654754 });
+        alert("Request is rejected.");
     }
 
     async approveRequest() {
-
+        await proxy.methods.approveRequest(this.state.currentRequestIndex, true)
+            .send({ from: this.state.accounts[0], gas: 6654754 });
+        alert("Request is approved.");
     }
 
     async getBorrowerRating() {
+        let tempRating = await proxy.methods.showBorrowerRating(this.state.currentRequest[0])
+            .call({ from: this.state.accounts[0] });
 
+        this.setState({ borrowerRating: tempRating });
+    }
+
+    handleBorrowerRatingChange(field, e) {
+        let tempBorrowerRating = e.target.value;
+        this.setState({ enterBorrowerRating: tempBorrowerRating });
     }
 
     render() {
@@ -80,8 +102,13 @@ export default class LenderRequests extends React.Component {
                     <button id="prevButton" onClick={() => this.rejectRequest()} >Reject</button>
                     <button id="nxtButton" onClick={() => this.approveRequest()} >Approve</button>
                     <button id="nxtButton" onClick={() => this.closeRequest()} >Close</button>
-                    <button id="nxtButton" onClick={() => this.getBorrowerRating()} >Show Applicants Rating</button>
-                    <text>{this.state.borrowerRating}</text>
+                    <button id="nxtButton" onClick={() => this.getBorrowerRating()} >Show Borrower Rating</button>
+
+                </div>
+                <div>
+                    <text>Existing Rating of the Borrower :  {this.state.borrowerRating}</text>
+                    <Input type="text" ref="enterBorrowerRating" placeholder="Enter Rating for Borrower"
+                        value={this.state.enterBorrowerRating} handleInputChange={this.handleBorrowerRatingChange.bind(this, 'name')} />
                 </div>
             </div>
         );

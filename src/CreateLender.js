@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './Style.css';
-import { Link } from 'react-router';
 import web3 from './web3';
 import proxy from './contract-proxy';
 import Input from './controls/Input';

@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import './Style.css';
-import { Link } from 'react-router';
 import web3 from './web3';
 import proxy from './contract-proxy';
-import Input from './controls/Input';
 
 class Transactions extends Component {
     state = {
@@ -21,7 +19,7 @@ class Transactions extends Component {
         let newIndex = this.state.currentTransaction + 1;
         if (newIndex < this.state.totalTransactions) {
             this.setState({ currentTransaction: newIndex });
-            let tempTransation = await proxy.methods.showTransaction(newIndex).call();
+            let tempTransation = await proxy.methods.showTransaction(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentTransaction: tempTransation });
         }
         else {
@@ -33,7 +31,7 @@ class Transactions extends Component {
         let newIndex = this.state.currentTransaction - 1;
         if (newIndex > -1) {
             this.setState({ currentTransaction: newIndex });
-            let tempTransation = await proxy.methods.showTransaction(newIndex).call();
+            let tempTransation = await proxy.methods.showTransaction(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentTransaction: tempTransation });
         }
         else {
@@ -45,10 +43,10 @@ class Transactions extends Component {
         let tempAccounts = await web3.eth.getAccounts();
         this.setState({ accounts: tempAccounts });
 
-        let tempTotalTransactions = await proxy.methods.numberOfTransactions().call();
+        let tempTotalTransactions = await proxy.methods.numberOfTransactions().call({from : tempAccounts[0]});
         this.setState({ totalTransactions: parseInt(tempTotalTransactions) });
 
-        let tempTransaction = await proxy.methods.showTransaction(this.state.currentTransactionIndex).call();
+        let tempTransaction = await proxy.methods.showTransaction(this.state.currentTransactionIndex).call({from : tempAccounts[0]});
         this.setState({ currentTransaction: tempTransaction });
     }
 

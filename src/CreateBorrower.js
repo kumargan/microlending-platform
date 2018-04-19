@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './Style.css';
-import { Link } from 'react-router';
 import web3 from './web3';
 import proxy from './contract-proxy';
 import Input from './controls/Input';
@@ -39,8 +38,6 @@ class CreateBorrower extends Component {
                         value={this.state.borrowerDetails.name} handleInputChange={this.handleBorrowerInputChange.bind(this, 'name')} />
                 </div>
                 <button id="registerBorrowerButton" onClick={() => this.registerBorrower()} >Register Borrower</button>
-                <Link to="/borrower/requests" name="borrowerReqButton" id="borrowerReqButton">View Borrower Requests</Link>
-
             </div>
         );
     }

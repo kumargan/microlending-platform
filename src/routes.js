@@ -1,8 +1,7 @@
 import React from 'react';
-import { Route, Router, IndexRedirect } from 'react-router';
+import { Route, Router } from 'react-router';
 import Lenders from './Lenders';
 import CreateLender from './CreateLender';
-import Borrowers from './CreateBorrower';
 import Transations from './Transactions';
 import CreateRequest from './CreateRequest';
 import LenderRequests from './LenderRequests';

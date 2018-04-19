@@ -1,21 +1,23 @@
-import React, { Component } from 'react';
+import React from 'react';
 import proxy from './contract-proxy';
+import web3 from './web3';
 
 export default class BorrowerRequests extends React.Component {
     state = {
+        accounts: [],
         currentRequestIndex: 0,
         currentRequest: '',
         totalRquests: 0,
     }
-    constructor(props) {
-        super(props);
-    };
 
     async componentDidMount() {
-        let tempTotalRquests = await proxy.methods.totalBorrowerRequest().call();
+        let tempAccounts = await web3.eth.getAccounts();
+        this.setState({ accounts: tempAccounts });
+
+        let tempTotalRquests = await proxy.methods.totalBorrowerRequest().call({from : tempAccounts[0]});
         this.setState({ totalRquests: parseInt(tempTotalRquests) });
 
-        let tempRequest = await proxy.methods.showBorrowerRequest(this.state.currentRequestIndex).call();
+        let tempRequest = await proxy.methods.showBorrowerRequest(this.state.currentRequestIndex).call({from : tempAccounts[0]});
         this.setState({ currentRequest: tempRequest });
     }
 
@@ -23,7 +25,7 @@ export default class BorrowerRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex + 1;
         if (newIndex < this.state.totalRquests) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call();
+            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentRequest: tempRequest });
         }
         else {
@@ -36,7 +38,7 @@ export default class BorrowerRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex - 1;
         if (newIndex > -1) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call();
+            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentRequest: tempRequest });
         }
         else {

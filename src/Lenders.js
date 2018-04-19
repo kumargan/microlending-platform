@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import './Style.css';
-import { Link } from 'react-router';
 import web3 from './web3';
 import proxy from './contract-proxy';
-import Input from './controls/Input';
 
 class Lenders extends Component {
     state = {
@@ -17,7 +15,7 @@ class Lenders extends Component {
         let newIndex = this.state.currentLenderIndex + 1;
         if (newIndex < this.state.totalLenders) {
             this.setState({ currentLenderIndex: newIndex });
-            let tempLender = await proxy.methods.showLender(newIndex).call();
+            let tempLender = await proxy.methods.showLender(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentLender: tempLender });
         }
         else {
@@ -29,7 +27,7 @@ class Lenders extends Component {
         let newIndex = this.state.currentLenderIndex - 1;
         if (newIndex > -1) {
             this.setState({ currentLenderIndex: newIndex });
-            let tempLender = await proxy.methods.showLender(newIndex).call();
+            let tempLender = await proxy.methods.showLender(newIndex).call({from : this.state.accounts[0]});
             this.setState({ currentLender: tempLender });
         }
         else {
@@ -41,10 +39,10 @@ class Lenders extends Component {
         let tempAccounts = await web3.eth.getAccounts();
         this.setState({ accounts: tempAccounts });
 
-        let tempTotalLenders = await proxy.methods.numberOfLenders().call();
+        let tempTotalLenders = await proxy.methods.numberOfLenders().call({from : tempAccounts[0]});
         this.setState({ totalLenders: parseInt(tempTotalLenders) });
 
-        let tempLender = await proxy.methods.showLender(this.state.currentLenderIndex).call();
+        let tempLender = await proxy.methods.showLender(this.state.currentLenderIndex).call({from : tempAccounts[0]});
         this.setState({ currentLender: tempLender });
     }
 
@@ -58,8 +56,6 @@ class Lenders extends Component {
                 <p> Address  : <b>{this.state.currentLender[2]}</b></p>
                 <button id="prevButton" onClick={() => this.getPreviousLender()} >Previous</button>
                 <button id="nxtButton" onClick={() => this.getNextLender()} >Next</button>
-                <Link to="/lender/requests" name="lenderReqButton" id="lenderReqButton">View Lender Requests</Link>
-
             </div>
         );
     }
