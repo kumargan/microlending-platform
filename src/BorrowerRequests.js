@@ -1,23 +1,21 @@
 import React, { Component } from 'react';
 import proxy from './contract-proxy';
 
-export default class LenderRequests extends React.Component {
+export default class BorrowerRequests extends React.Component {
     state = {
         currentRequestIndex: 0,
         currentRequest: '',
         totalRquests: 0,
-        borrowerRating: ''
     }
     constructor(props) {
         super(props);
-
     };
 
     async componentDidMount() {
-        let tempTotalRquests = await proxy.methods.totalLenderRequests().call();
+        let tempTotalRquests = await proxy.methods.totalBorrowerRequest().call();
         this.setState({ totalRquests: parseInt(tempTotalRquests) });
 
-        let tempRequest = await proxy.methods.showLenderRequests(this.state.currentRequestIndex).call();
+        let tempRequest = await proxy.methods.showBorrowerRequest(this.state.currentRequestIndex).call();
         this.setState({ currentRequest: tempRequest });
     }
 
@@ -25,7 +23,7 @@ export default class LenderRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex + 1;
         if (newIndex < this.state.totalRquests) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call();
+            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call();
             this.setState({ currentRequest: tempRequest });
         }
         else {
@@ -38,7 +36,7 @@ export default class LenderRequests extends React.Component {
         let newIndex = this.state.currentRequestIndex - 1;
         if (newIndex > -1) {
             this.setState({ currentRequestIndex: newIndex });
-            let tempRequest = await proxy.methods.showLenderRequests(newIndex).call();
+            let tempRequest = await proxy.methods.showBorrowerRequest(newIndex).call();
             this.setState({ currentRequest: tempRequest });
         }
         else {
@@ -46,19 +44,7 @@ export default class LenderRequests extends React.Component {
         }
     }
 
-    async closeRequest() {
-
-    }
-
-    async rejectRequest() {
-
-    }
-
-    async approveRequest() {
-
-    }
-
-    async getBorrowerRating() {
+    async makePayment() {
 
     }
 
@@ -77,11 +63,7 @@ export default class LenderRequests extends React.Component {
                 </div>
 
                 <div>
-                    <button id="prevButton" onClick={() => this.rejectRequest()} >Reject</button>
-                    <button id="nxtButton" onClick={() => this.approveRequest()} >Approve</button>
-                    <button id="nxtButton" onClick={() => this.closeRequest()} >Close</button>
-                    <button id="nxtButton" onClick={() => this.getBorrowerRating()} >Show Applicants Rating</button>
-                    <text>{this.state.borrowerRating}</text>
+                    <button id="prevButton" onClick={() => this.makePayment()} >Make Payment</button>
                 </div>
             </div>
         );

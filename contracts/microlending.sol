@@ -94,6 +94,10 @@ contract microlending_platform {
         Request storage request = borrowerRequests[msg.sender][index];
         return (request.lender,uint(request.state),request.paymentDate,request.tenure,request.amount);
     }
+
+    function totalBorrowerRequest() public view returns(uint){
+        return borrowerRequests[msg.sender].length;
+    }
     
     function makeBorrowerPayment(uint index)public payable {
         
@@ -121,10 +125,16 @@ contract microlending_platform {
         requests.push(request);
         bRequests.push(request);
     }
+
     //ui is supposed to maintain the index
     function showLenderRequests(uint index) public view onlyLender(index) returns(address,uint,uint,uint,uint){
         Request storage request = lenderRequests[msg.sender][index];
         return (request.borrower,uint(request.state),request.paymentDate,request.tenure,request.amount);
+    } 
+
+     //ui is supposed to maintain the index
+    function totalLenderRequests() public view returns(uint){
+        return lenderRequests[msg.sender].length;
     } 
     
     //ui is supposed to maintain the index
