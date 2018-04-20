@@ -1,5 +1,5 @@
 {
-  "name": "inbox",
+  "name": "microlending",
   "version": "1.0.0",
   "description": "ethereum",
   "main": "index.js",
@@ -21,6 +21,6 @@
     "react-scripts": "1.1.4",
     "solc": "0.4.21",
     "truffle-hdwallet-provider": "0.0.3",
-    "web3": "1.0.0-beta.26"
+    "web3": "^1.0.0-beta.26"
   }
 }
