@@ -10,7 +10,14 @@ export default class LenderRequests extends React.Component {
         currentRequest: '',
         totalRquests: 0,
         borrowerRating: '',
-        enterBorrowerRating: ''
+        enterBorrowerRating: '',
+        status: {
+            0: 'REQUESTED',
+            1: 'APPROVED',
+            2: 'REJECTED',
+            3: 'BORROWER_PAID',
+            4: 'CLOSED'
+        }
     }
 
     async componentDidMount() {
@@ -91,7 +98,7 @@ export default class LenderRequests extends React.Component {
                 <div>
                     <p><u> Request Index #: <b>{this.state.currentRequestIndex}</b></u> </p>
                     <p> Borrower  : <b>{this.state.currentRequest[0]}</b></p>
-                    <p> State  : <b>{this.state.currentRequest[1]}</b></p>
+                    <p> State  : <b>{this.state.status[this.state.currentRequest[1]]}</b></p>
                     <p> Tenure  : <b>{this.state.currentRequest[3]}</b></p>
                     <p> Amount  : <b>{this.state.currentRequest[4]}</b></p>
                     <button id="prevButton" onClick={() => this.getPreviousRequest()} >Previous</button>

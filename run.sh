@@ -37,7 +37,7 @@
 		docker pull trufflesuite/ganache-cli
 	fi
 	npm i
-  docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest -l 1000000000000000000 -m "limb away mix group together purchase because duck wonder bracket picnic subway" -a 3 -u 0 -u 1 -u 2 > process.pid
+  docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest -m "limb away mix group together purchase because duck wonder bracket picnic subway" -a 3 -u 0 -u 1 -u 2 > process.pid
   sleep 10
   echo "use the following private keys for metamask, import the keys in metamask to get the unlocked accounts"
   docker logs `cat process.pid` | grep -n "(0)" | grep "11:(0)"
