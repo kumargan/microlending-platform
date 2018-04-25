@@ -7,6 +7,7 @@ contract microlending_platform {
     //Borrower[] public borrowers;
     Transaction[] public allTransactions;
     mapping(address=>bool) isLender;
+    mapping(address=>bool) isBorrower;
     mapping(address=>Borrower) borrowers;
     mapping(address=>Request[]) lenderRequests;
     mapping(address=>Request[]) borrowerRequests;
@@ -46,6 +47,7 @@ contract microlending_platform {
     }
     
     function registerLender(string name,uint roi) public payable {
+        require(!isLender[msg.sender]);
         Lender memory newLender = Lender({
            selfAdd:msg.sender,
            name:name,
@@ -80,6 +82,7 @@ contract microlending_platform {
     }
     
     function createBorrower(string name) public payable {
+        require(!isBorrower[msg.sender]);
         Borrower memory borrower = Borrower({
             selfAdd:msg.sender,
             name : name,
@@ -87,6 +90,7 @@ contract microlending_platform {
         });    
         
         borrowers[msg.sender] = borrower;
+        isBorrower[msg.sender] = true;
     }
     
     //used by borrower to see his requests
@@ -174,5 +178,9 @@ contract microlending_platform {
         require(msg.sender==request.lender);
         _;
     }
-    
+
+    modifier onlyBorrower(uint index){
+        require(isBorrower[msg.sender]);
+        _;
+    }
 }
