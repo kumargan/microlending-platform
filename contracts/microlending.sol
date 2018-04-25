@@ -7,6 +7,7 @@ contract microlending_platform {
     //Borrower[] public borrowers;
     Transaction[] public allTransactions;
     mapping(address=>bool) isLender;
+    mapping(address=>bool) isBorrower;
     mapping(address=>Borrower) borrowers;
     mapping(address=>Request[]) lenderRequests;
     mapping(address=>Request[]) borrowerRequests;
@@ -45,7 +46,8 @@ contract microlending_platform {
         uint amount;
     }
     
-    function registerLender(string name,uint roi) public {
+    function registerLender(string name,uint roi) public payable {
+        require(!isLender[msg.sender]);
         Lender memory newLender = Lender({
            selfAdd:msg.sender,
            name:name,
@@ -79,7 +81,8 @@ contract microlending_platform {
         return borrower.rating;
     }
     
-    function createBorrower(string name) public {
+    function createBorrower(string name) public payable {
+        require(!isBorrower[msg.sender]);
         Borrower memory borrower = Borrower({
             selfAdd:msg.sender,
             name : name,
@@ -87,6 +90,7 @@ contract microlending_platform {
         });    
         
         borrowers[msg.sender] = borrower;
+        isBorrower[msg.sender] = true;
     }
     
     //used by borrower to see his requests
@@ -99,7 +103,7 @@ contract microlending_platform {
         return borrowerRequests[msg.sender].length;
     }
     
-    function makeBorrowerPayment(uint index)public payable {
+    function makeBorrowerPayment(uint index) public payable {
         
         Request storage request = borrowerRequests[msg.sender][index];
         require(msg.value>=request.amount);
@@ -110,7 +114,7 @@ contract microlending_platform {
     
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
     
-    function createRequest(address lender,uint amount, uint tenure) public  {
+    function createRequest(address lender,uint amount, uint tenure) public payable {
         Request memory request = Request({
              state: States.REQUESTED,
              lender: lender,
@@ -151,7 +155,7 @@ contract microlending_platform {
         }
     }
     //ui is supposed to maintain the index
-    function closeRequest(uint index,uint score) public onlyLender(index){
+    function closeRequest(uint index,uint score) public payable onlyLender(index){
         //score should be out of 10
         require(score<=10);
         //calculate the new rating
@@ -174,5 +178,9 @@ contract microlending_platform {
         require(msg.sender==request.lender);
         _;
     }
-    
+
+    modifier onlyBorrower(uint index){
+        require(isBorrower[msg.sender]);
+        _;
+    }
 }
