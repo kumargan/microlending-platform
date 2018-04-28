@@ -150,7 +150,7 @@ contract microlending_platform {
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
-            request.requestDate = block.timestamp + (request.tenure*86,400);//*60*60*24
+            request.requestDate = block.timestamp + (request.tenure * 86400);//*60*60*24
         }else{
             request.state = States.REJECTED;
         }
