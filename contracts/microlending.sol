@@ -33,7 +33,8 @@ contract microlending_platform {
     struct Borrower {
         address selfAdd;
         string name;
-        uint rating;
+        uint totalRateVal;
+        uint totalRateCnt;
     }
 
     struct Request {
@@ -78,15 +79,18 @@ contract microlending_platform {
 
     function showBorrowerRating(address borroweradd) public view returns(uint){
         Borrower storage borrower = borrowers[borroweradd];
-        return borrower.rating;
+
+        return (borrower.totalRateVal/borrower.totalRateCnt);
     }
 
     function createBorrower(string name) public payable {
         require(!isBorrower[msg.sender]);
+
         Borrower memory borrower = Borrower({
             selfAdd:msg.sender,
             name : name,
-            rating : 10
+            totalRateVal : 10,
+            totalRateCnt : 1
         });
 
         borrowers[msg.sender] = borrower;
@@ -115,7 +119,8 @@ contract microlending_platform {
 
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
 
-    function createRequest(address lender,uint amount, uint tenure) public payable {
+    function createRequest(address lender,uint amount, uint tenure) public payable onlyBorrower {
+
         Request memory request = Request({
              state: States.REQUESTED,
              lender: lender,
@@ -150,7 +155,7 @@ contract microlending_platform {
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
-            request.requestDate = block.timestamp + (request.tenure * 86400);//*60*60*24
+            request.requestDate = block.timestamp;
         }else{
             request.state = States.REJECTED;
         }
@@ -162,12 +167,12 @@ contract microlending_platform {
         //calculate the new rating
         Request storage request = lenderRequests[msg.sender][index];
         Borrower storage borrower = borrowers[request.borrower];
-        uint oldrating = borrower.rating;
+        //uint oldrating = borrower.rating;
         //update score of the borrower
 
-        uint newRating = ((oldrating+newRating)/20)*10;
-        borrower.rating = newRating;
-
+        //uint newRating = (oldrating/2)+(newRating/2);
+        borrower.totalRateVal += score;
+        borrower.totalRateCnt += 1;
         //close the Request
         request.state = States.CLOSED;
 
@@ -180,7 +185,7 @@ contract microlending_platform {
         _;
     }
 
-    modifier onlyBorrower(uint index){
+    modifier onlyBorrower(){
         require(isBorrower[msg.sender]);
         _;
     }
