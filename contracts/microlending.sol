@@ -110,6 +110,7 @@ contract microlending_platform {
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
         request.actualPaymentDate = block.timestamp;
+        allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
     }
 
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
