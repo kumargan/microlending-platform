@@ -1,5 +1,6 @@
-## microlending-platform
-Enables microlending over trust based network using blockchain.
+## Microlending-Platform
+
+Enables Microlending over trust based network using Blockchain.
 
 Features :
  1. Anyone can register themselves as lender ( Name,Rate of Interest).
@@ -14,7 +15,7 @@ Features :
 
 ## Run locally and test :
 
-  # Prerequsites :
+  # Prerequisites :
 
     1. Metamask Installed in browser ( Available as chrome plugin ).
     2. Add the following private keys in metamask
@@ -29,8 +30,22 @@ Features :
 
   # Run the server
     1. sh run.sh
-      --  Builds the contract. Deploys the contract. Starts local server and hosts the UI. It also holds the terminal for displaying node server logs.
+      --  Builds the contract. Deploys the contract on local Blockchain. Starts local server and hosts the UI. It also holds the terminal for displaying node server logs.
 
   # kill the server
     1. `crtl+c` will kill the server.
     2. docker stop `cat process.pid` will stop the local ethereum blockchain.
+
+## Run on rinkeby
+
+  # Prerequisites :
+
+    1. Metamask Installed in browser ( Available as chrome plugin ).
+    2. Node js installed on local machine.
+
+  # Run the server
+    1. sh run-rinkeby.sh <true/false/empty>
+      -- starts the ui server locally but uses contract deloyed in rinkeby.
+        - true : deploys a new contract and uses the new address. eg `sh run-rinkeby.sh true`
+        - false : uses already existing contract available in rinkeby. eg `sh run-rinkeby.sh false`
+        - empty : same as false. eg `sh run-rinkeby.sh`

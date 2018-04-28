@@ -2,7 +2,7 @@ pragma solidity ^0.4.21;
 pragma experimental ABIEncoderV2;
 //do not allow same lender to register itself as different lenders( use unique identifier )
 contract microlending_platform {
-    
+
     Lender[] public lenders;
     //Borrower[] public borrowers;
     Transaction[] public allTransactions;
@@ -11,19 +11,19 @@ contract microlending_platform {
     mapping(address=>Borrower) borrowers;
     mapping(address=>Request[]) lenderRequests;
     mapping(address=>Request[]) borrowerRequests;
-    
+
     enum States { REQUESTED , APPROVED, REJECTED ,BORROWER_PAID, CLOSED }
-    
+
     function microlending_platform() public {
-        
+
     }
-    
+
     struct Transaction{
         address sender;
         address receiver;
         uint amount;
     }
-    
+
     struct Lender {
         address selfAdd;
         string name;
@@ -35,17 +35,17 @@ contract microlending_platform {
         string name;
         uint rating;
     }
-    
+
     struct Request {
         address lender; //to be able display all transactions to everyone
         States state;
         address borrower; //for approval and display
-        uint paymentDate; //date by which loan is to be paid( calculated based on tenure and now )
-        uint actualPaymentDate;//date at which borrower pays back
+        uint requestDate; //date by which loan is to be paid( calculated based on tenure and now )
+        uint paymentDate;//date at which borrower pays back
         uint tenure;
         uint amount;
     }
-    
+
     function registerLender(string name,uint roi) public payable {
         require(!isLender[msg.sender]);
         Lender memory newLender = Lender({
@@ -53,11 +53,11 @@ contract microlending_platform {
            name:name,
            roi:roi
         });
-        
+
         lenders.push(newLender);
         isLender[msg.sender] = true;
     }
-    
+
     function showLender(uint index) public view returns(string,uint,address) {
         return (lenders[index].name,lenders[index].roi,lenders[index].selfAdd);
     }
@@ -65,9 +65,9 @@ contract microlending_platform {
     function numberOfLenders() public view returns(uint) {
         return lenders.length;
     }
-    
+
     //function showLenders(uint startIndex, uint endIndex,bool sort) public payable returns(Lender[]) { }
-    
+
     function showTransaction(uint index) public view returns(address,address,uint){
         return (allTransactions[index].sender,allTransactions[index].receiver,allTransactions[index].amount);
     }
@@ -75,45 +75,46 @@ contract microlending_platform {
     function numberOfTransactions() public view returns(uint) {
         return allTransactions.length;
     }
-    
+
     function showBorrowerRating(address borroweradd) public view returns(uint){
         Borrower storage borrower = borrowers[borroweradd];
         return borrower.rating;
     }
-    
+
     function createBorrower(string name) public payable {
         require(!isBorrower[msg.sender]);
         Borrower memory borrower = Borrower({
             selfAdd:msg.sender,
             name : name,
             rating : 10
-        });    
-        
+        });
+
         borrowers[msg.sender] = borrower;
         isBorrower[msg.sender] = true;
     }
-    
+
     //used by borrower to see his requests
     function showBorrowerRequest(uint index) public view returns(address,uint,uint,uint,uint){
         Request storage request = borrowerRequests[msg.sender][index];
-        return (request.lender,uint(request.state),request.paymentDate,request.tenure,request.amount);
+        return (request.lender,uint(request.state),request.requestDate,request.tenure,request.amount);
     }
 
     function totalBorrowerRequest() public view returns(uint){
         return borrowerRequests[msg.sender].length;
     }
-    
+
     function makeBorrowerPayment(uint index) public payable {
-        
+
         Request storage request = borrowerRequests[msg.sender][index];
         require(msg.value>=request.amount);
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
-        request.actualPaymentDate = block.timestamp;
+        request.paymentDate = block.timestamp;
+        allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
     }
-    
+
     //function showTransactions(uint startIndex, uint endIndex) public payable returns(string){}
-    
+
     function createRequest(address lender,uint amount, uint tenure) public payable {
         Request memory request = Request({
              state: States.REQUESTED,
@@ -121,8 +122,8 @@ contract microlending_platform {
              borrower: msg.sender,
              tenure: tenure,
              amount: amount,
-             paymentDate:0,
-             actualPaymentDate:0
+             requestDate:0,
+             paymentDate:0
             });
         Request[] storage requests = lenderRequests[lender];
         Request[] storage bRequests = borrowerRequests[msg.sender];
@@ -133,14 +134,14 @@ contract microlending_platform {
     //ui is supposed to maintain the index
     function showLenderRequests(uint index) public view onlyLender(index) returns(address,uint,uint,uint,uint){
         Request storage request = lenderRequests[msg.sender][index];
-        return (request.borrower,uint(request.state),request.paymentDate,request.tenure,request.amount);
-    } 
+        return (request.borrower,uint(request.state),request.requestDate,request.tenure,request.amount);
+    }
 
      //ui is supposed to maintain the index
     function totalLenderRequests() public view returns(uint){
         return lenderRequests[msg.sender].length;
-    } 
-    
+    }
+
     //ui is supposed to maintain the index
     function approveRequest(uint index,bool approved) public payable onlyLender(index){
         Request[] storage requests = lenderRequests[msg.sender];
@@ -149,7 +150,7 @@ contract microlending_platform {
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
-            request.paymentDate = block.timestamp + (request.tenure*60*60*24);
+            request.requestDate = block.timestamp + (request.tenure*86,400);//*60*60*24
         }else{
             request.state = States.REJECTED;
         }
@@ -161,17 +162,17 @@ contract microlending_platform {
         //calculate the new rating
         Request storage request = lenderRequests[msg.sender][index];
         Borrower storage borrower = borrowers[request.borrower];
-        uint oldrating = borrower.rating; 
+        uint oldrating = borrower.rating;
         //update score of the borrower
-        
+
         uint newRating = ((oldrating+newRating)/20)*10;
         borrower.rating = newRating;
-        
+
         //close the Request
         request.state = States.CLOSED;
-        
+
     }
-    
+
     modifier onlyLender(uint index){
         require(isLender[msg.sender]);
         Request storage request = lenderRequests[msg.sender][index];
