@@ -40,8 +40,8 @@ contract microlending_platform {
         address lender; //to be able display all transactions to everyone
         States state;
         address borrower; //for approval and display
-        uint paymentDate; //date by which loan is to be paid( calculated based on tenure and now )
-        uint actualPaymentDate;//date at which borrower pays back
+        uint requestDate; //date by which loan is to be paid( calculated based on tenure and now )
+        uint paymentDate;//date at which borrower pays back
         uint tenure;
         uint amount;
     }
@@ -96,7 +96,7 @@ contract microlending_platform {
     //used by borrower to see his requests
     function showBorrowerRequest(uint index) public view returns(address,uint,uint,uint,uint){
         Request storage request = borrowerRequests[msg.sender][index];
-        return (request.lender,uint(request.state),request.paymentDate,request.tenure,request.amount);
+        return (request.lender,uint(request.state),request.requestDate,request.tenure,request.amount);
     }
 
     function totalBorrowerRequest() public view returns(uint){
@@ -109,7 +109,7 @@ contract microlending_platform {
         require(msg.value>=request.amount);
         request.lender.transfer(request.amount);
         request.state = States.BORROWER_PAID;
-        request.actualPaymentDate = block.timestamp;
+        request.paymentDate = block.timestamp;
         allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
     }
 
@@ -122,8 +122,8 @@ contract microlending_platform {
              borrower: msg.sender,
              tenure: tenure,
              amount: amount,
-             paymentDate:0,
-             actualPaymentDate:0
+             requestDate:0,
+             paymentDate:0
             });
         Request[] storage requests = lenderRequests[lender];
         Request[] storage bRequests = borrowerRequests[msg.sender];
@@ -134,7 +134,7 @@ contract microlending_platform {
     //ui is supposed to maintain the index
     function showLenderRequests(uint index) public view onlyLender(index) returns(address,uint,uint,uint,uint){
         Request storage request = lenderRequests[msg.sender][index];
-        return (request.borrower,uint(request.state),request.paymentDate,request.tenure,request.amount);
+        return (request.borrower,uint(request.state),request.requestDate,request.tenure,request.amount);
     }
 
      //ui is supposed to maintain the index
@@ -150,7 +150,7 @@ contract microlending_platform {
             request.borrower.transfer(request.amount);
             request.state = States.APPROVED;
             allTransactions.push(Transaction(request.lender,request.borrower,request.amount));
-            request.paymentDate = block.timestamp + (request.tenure*60*60*24);
+            request.requestDate = block.timestamp + (request.tenure*86,400);//*60*60*24
         }else{
             request.state = States.REJECTED;
         }
